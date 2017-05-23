@@ -13,27 +13,26 @@
  */
 
 var less = require('less');
-var root = mix.project.getProjectPath();
+var root = mix.project.getRoot();
 
 module.exports = function(content, file, conf) {
-    conf.paths = [ file.dirname, root ];
+    conf.paths = [file.dirname, root];
     if (conf.syncImport === undefined) {
         conf.syncImport = true;
     }
     if (conf.relativeUrls === undefined) {
         conf.relativeUrls = true;
     }
-    var parser = new(less.Parser)(conf);
-    parser.parse(content, function (err, tree) {
-        if(err){
-            throw err;
+    less.render(content, conf, function(error, output){
+        if(error){
+            throw error;
         } else {
-            if(parser.imports){
-                fis.util.map(parser.imports.files, function(path){
+            if(output.imports){
+                mix.util.map(output.imports, function(path){
                     file.cache.addDeps(path);
                 });
             }
-            content = tree.toCSS(conf);
+            content = output.css;
         }
     });
     return content;
